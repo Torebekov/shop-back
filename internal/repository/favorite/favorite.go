@@ -82,8 +82,7 @@ func (r *favorite) List(userID uint64) (products []models.Product, err error) {
 	}
 	defer rows.Close()
 
-	rows.Next()
-	{
+	for rows.Next() {
 		var productModel models.Product
 		err = rows.Scan(&productModel.ID, &productModel.Name, &productModel.CategoryID, &productModel.Image, &productModel.Price)
 		if err != nil {

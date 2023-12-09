@@ -3,6 +3,7 @@ package config
 import (
 	"fmt"
 	"github.com/kelseyhightower/envconfig"
+	"os"
 )
 
 type Config struct {
@@ -32,15 +33,12 @@ func Load() *Config {
 }
 
 func (m *Config) DSN() string {
-	m.dsn = fmt.Sprintf(
-		"host=%s port=%d user=%s password=%s dbname=%s sslmode=%s",
-		m.DBHost,
-		m.DBPort,
-		m.DBLogin,
-		m.DBPassword,
-		m.DBName,
-		"disable",
-	)
+	m.dsn = fmt.Sprintf("host=%s user=%s password=%s dbname=%s sslmode=disable port=%s",
+		os.Getenv("POSTGRES_HOST"),
+		os.Getenv("POSTGRES_USER"),
+		os.Getenv("POSTGRES_PASSWORD"),
+		os.Getenv("POSTGRES_DB"),
+		os.Getenv("POSTGRES_PORT"))
 
 	return m.dsn
 }

@@ -10,11 +10,7 @@ import (
 
 func (srv *Server) GetProducts(c *gin.Context) {
 	searchText := c.Query("search")
-	categoryID, err := strconv.ParseUint(c.Query("categoryID"), 10, 64)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
+	categoryID, _ := strconv.ParseUint(c.Query("categoryID"), 10, 64)
 
 	results, err := srv.core.Product().List(
 		searchText,
@@ -47,7 +43,7 @@ func (srv *Server) GetProduct(c *gin.Context) {
 
 func (srv *Server) AddProduct(c *gin.Context) {
 	var product models.Product
-	err := c.BindJSON(product)
+	err := c.BindJSON(&product)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
