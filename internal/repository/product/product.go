@@ -33,6 +33,7 @@ func (r *product) List(searchText string, categoryID uint64) (products []models.
 		l.Error("couldn't make request", zap.Error(err))
 		return
 	}
+	defer rows.Close()
 
 	rows.Next()
 	{
@@ -44,6 +45,10 @@ func (r *product) List(searchText string, categoryID uint64) (products []models.
 		}
 
 		products = append(products, productModel)
+	}
+
+	if err = rows.Err(); err != nil {
+		l.Error("iteration error", zap.Error(err))
 	}
 
 	return
