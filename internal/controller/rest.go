@@ -2,6 +2,7 @@ package controller
 
 import (
 	"context"
+	"github.com/Torebekov/shop-back/internal/clients/auth"
 	core "github.com/Torebekov/shop-back/internal/core"
 	"github.com/gin-gonic/gin"
 	"net/http"
@@ -10,15 +11,18 @@ import (
 type Server struct {
 	ctx  context.Context
 	core *core.Core
+	auth auth.Interface
 }
 
 func NewServer(
 	ctx context.Context,
 	core *core.Core,
+	auth auth.Interface,
 ) *Server {
 	return &Server{
 		ctx:  ctx,
 		core: core,
+		auth: auth,
 	}
 }
 
