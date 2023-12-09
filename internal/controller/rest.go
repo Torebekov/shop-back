@@ -36,6 +36,9 @@ func (s *Server) Run(port string) error {
 	productRouter := v1.Group("product")
 	{
 		productRouter.GET("", s.AuthMiddleware(user, false), s.GetProducts)
+		productRouter.GET("/:id", s.GetProduct)
+		productRouter.POST("/:id", s.AuthMiddleware(admin, true), s.AddProduct)
+		productRouter.DELETE("/:id", s.AuthMiddleware(admin, true), s.RemoveProduct)
 
 		favoriteRouter := productRouter.Group("favorite")
 		favoriteRouter.GET("", s.AuthMiddleware(user, true), s.GetFavorite)

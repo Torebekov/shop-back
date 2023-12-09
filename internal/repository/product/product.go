@@ -38,11 +38,11 @@ func (r *product) List(searchText string, categoryID, userID uint64) (products [
 			category.name,
 			image,
 			price,
-			CASE WHEN user_favorite.product_id IS NULL THEN FALSE ELSE TRUE END
+			CASE WHEN user_product.product_id IS NULL THEN FALSE ELSE TRUE END
 		FROM
 			product
 		LEFT JOIN
-			user_favorite ON user_favorite.product_id = product.ID AND user_id = %d
+			user_product ON user_product.product_id = product.ID AND user_id = %d
 		JOIN
 			category ON category.id = product.category_id`, userID)
 
@@ -82,6 +82,70 @@ func (r *product) List(searchText string, categoryID, userID uint64) (products [
 
 	if err = rows.Err(); err != nil {
 		l.Error("iteration error", zap.Error(err))
+		return
+	}
+
+	return
+}
+
+func (r *product) ByID(productID uint64) (productModel models.Product, err error) {
+	l := logger.WorkLogger.Named("repo.product.List")
+
+	if r.db == nil {
+		l.Error("DB not initialized")
+		return
+	}
+
+	query := `
+		SELECT
+			id,
+			name,
+			category_id,
+			image,
+			price
+		FROM
+			product
+			WHERE product.id = $1`
+
+	row := r.db.QueryRow(query, productID)
+
+	err = row.Scan(&productModel.ID, &productModel.Name, &productModel.CategoryID, &productModel.Image, &productModel.Price)
+	if err != nil {
+		l.Error("couldn't scan product", zap.Error(err))
+		return
+	}
+
+	return
+}
+
+func (r *product) Add(productModel models.Product) (err error) {
+	l := logger.WorkLogger.Named("repo.product.Add").With(zap.Any("productModel", productModel))
+
+	if r.db == nil {
+		l.Error("DB not initialized")
+		return
+	}
+
+	_, err = r.db.Exec("INSERT INTO product (name, category_id, image, price) VALUES ($1, $2, $3, $4)", productModel.Name, productModel.CategoryID, productModel.Image, productModel.Price)
+	if err != nil {
+		l.Error("couldn't insert product")
+		return
+	}
+
+	return
+}
+
+func (r *product) Remove(productID uint64) (err error) {
+	l := logger.WorkLogger.Named("repo.product.Remove").With(zap.Uint64("productID", productID))
+
+	if r.db == nil {
+		l.Error("DB not initialized")
+		return
+	}
+
+	_, err = r.db.Exec("DELETE FROM product WHERE id = $1", productID)
+	if err != nil {
+		l.Error("couldn't delete product")
 		return
 	}
 
