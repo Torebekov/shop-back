@@ -4,9 +4,11 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	interfaces "github.com/Torebekov/shop-back/internal/interfaces/repository"
 	"github.com/Torebekov/shop-back/internal/models"
 	"github.com/Torebekov/shop-back/modules/logger"
 	"go.uber.org/zap"
+	"strings"
 )
 
 type product struct {
@@ -14,14 +16,14 @@ type product struct {
 	ctx context.Context
 }
 
-func New(db *sql.DB, ctx context.Context) *product {
+func New(db *sql.DB, ctx context.Context) interfaces.IProduct {
 	return &product{
 		db:  db,
 		ctx: ctx,
 	}
 }
 
-func (r *product) List(searchText string, categoryID uint64) (products []models.ProductDTO, err error) {
+func (r *product) List(searchText string, categoryID, userID uint64) (products []models.ProductDTO, err error) {
 	l := logger.WorkLogger.Named("repo.product.List").With(zap.String("searchText", searchText), zap.Uint64("categoryID", categoryID))
 
 	if r.db == nil {
@@ -29,7 +31,7 @@ func (r *product) List(searchText string, categoryID uint64) (products []models.
 		return
 	}
 
-	query := `
+	query := fmt.Sprintf(`
 		SELECT
 			product.id,
 			product.name,
@@ -40,18 +42,24 @@ func (r *product) List(searchText string, categoryID uint64) (products []models.
 		FROM
 			product
 		LEFT JOIN
-			user_favorite ON user_favorite.product_id = product.ID
+			user_favorite ON user_favorite.product_id = product.ID AND user_id = %d
 		JOIN
-			category ON category.id = product.category_id
-		WHERE
-			user_id = 1`
+			category ON category.id = product.category_id`, userID)
 
-	if searchText != "" {
-		query += " AND product.name like '%" + searchText + "%'"
+	addWhereClause := func(condition string, value interface{}) {
+		if value != nil {
+			if strings.Contains(query, "WHERE") {
+				query += " AND"
+			} else {
+				query += " WHERE"
+			}
+
+			query += fmt.Sprintf(condition, value)
+		}
 	}
-	if categoryID != 0 {
-		query += fmt.Sprintf(" AND category_id = %d", categoryID)
-	}
+
+	addWhereClause(" product.name LIKE '%%%s%%'", searchText)
+	addWhereClause(" category_id = %d", categoryID)
 
 	rows, err := r.db.Query(query)
 	if err != nil {

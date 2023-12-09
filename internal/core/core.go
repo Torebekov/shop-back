@@ -19,6 +19,7 @@ type Core struct {
 	productRepo  irepo.IProduct
 	categoryRepo irepo.ICategory
 	favoriteRepo irepo.IFavorite
+	cartRepo irepo.ICart
 }
 
 func New(
@@ -66,6 +67,10 @@ func (s *Core) Category() irepo.ICategory {
 
 func (s *Core) Favorite() irepo.IFavorite {
 	return s.favoriteRepo
+}
+
+func (s *Core) Cart() irepo.ICart {
+	return s.cartRepo
 }
 
 func (s *Core) Config() *config.Config {

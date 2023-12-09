@@ -3,6 +3,7 @@ package category
 import (
 	"context"
 	"database/sql"
+	interfaces "github.com/Torebekov/shop-back/internal/interfaces/repository"
 	"github.com/Torebekov/shop-back/internal/models"
 	"github.com/Torebekov/shop-back/modules/logger"
 	"go.uber.org/zap"
@@ -13,7 +14,7 @@ type category struct {
 	ctx context.Context
 }
 
-func New(db *sql.DB, ctx context.Context) *category {
+func New(db *sql.DB, ctx context.Context) interfaces.ICategory {
 	return &category{
 		db:  db,
 		ctx: ctx,
