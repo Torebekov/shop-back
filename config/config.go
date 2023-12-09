@@ -11,11 +11,11 @@ type Config struct {
 
 	LogLevel string `envconfig:"LOG_LEVEL" default:"debug"`
 
-	DBHost     string `envconfig:"DB_HOST" default:"10.0.85.153"`
-	DBPort     int    `envconfig:"DB_PORT" default:"1522"`
-	DBName     string `envconfig:"DB_NAME" default:"IBDBTST"`
-	DBLogin    string `envconfig:"DB_LOGIN" default:"IBANK"`
-	DBPassword string `envconfig:"DB_PASSWORD" default:"For-ibnak12-ibank12"`
+	DBHost     string `envconfig:"POSTGRES_HOST" default:"0.0.0.0"`
+	DBPort     int    `envconfig:"POSTGRES_PORT" default:"5432"`
+	DBName     string `envconfig:"POSTGRES_DB" default:"postgres"`
+	DBLogin    string `envconfig:"POSTGRES_USER" default:"postgres"`
+	DBPassword string `envconfig:"POSTGRES_PASSWORD" default:"postgres"`
 
 	dsn string `envconfig:"DSN" json:"-"`
 }

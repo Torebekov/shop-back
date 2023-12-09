@@ -53,11 +53,5 @@ func (s *Server) Run(port string) error {
 
 	v1.GET("category", s.AuthMiddleware(user, false), s.GetCategories)
 
-	userRouter := v1.Group("user")
-	{
-		userRouter.GET("")
-		userRouter.PUT("")
-	}
-
 	return http.ListenAndServe(":"+port, router)
 }
