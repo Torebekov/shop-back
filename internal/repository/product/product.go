@@ -3,6 +3,7 @@ package product
 import (
 	"context"
 	"database/sql"
+	"fmt"
 	"github.com/Torebekov/shop-back/internal/models"
 	"github.com/Torebekov/shop-back/modules/logger"
 	"go.uber.org/zap"
@@ -28,7 +29,31 @@ func (r *product) List(searchText string, categoryID uint64) (products []models.
 		return
 	}
 
-	rows, err := r.db.Query(`SELECT product.id, product.name, category.name, image, price, CASE WHEN user_favorite.product_id IS NULL THEN FALSE ELSE TRUE END FROM product LEFT JOIN user_favorite ON user_favorite.product_id = product.ID JOIN category ON category.id = product.category_id`)
+	query := `
+		SELECT
+			product.id,
+			product.name,
+			category.name,
+			image,
+			price,
+			CASE WHEN user_favorite.product_id IS NULL THEN FALSE ELSE TRUE END
+		FROM
+			product
+		LEFT JOIN
+			user_favorite ON user_favorite.product_id = product.ID
+		JOIN
+			category ON category.id = product.category_id
+		WHERE
+			user_id = 1`
+
+	if searchText != "" {
+		query += " AND product.name like '%" + searchText + "%'"
+	}
+	if categoryID != 0 {
+		query += fmt.Sprintf(" AND category_id = %d", categoryID)
+	}
+
+	rows, err := r.db.Query(query)
 	if err != nil {
 		l.Error("couldn't make request", zap.Error(err))
 		return
@@ -38,10 +63,10 @@ func (r *product) List(searchText string, categoryID uint64) (products []models.
 	rows.Next()
 	{
 		var productModel models.ProductDTO
-
 		err = rows.Scan(&productModel.ID, &productModel.Name, &productModel.CategoryName, &productModel.Image, &productModel.Price, &productModel.IsFavorite)
 		if err != nil {
 			l.Error("couldn't scan product", zap.Error(err))
+			return
 		}
 
 		products = append(products, productModel)
@@ -49,6 +74,7 @@ func (r *product) List(searchText string, categoryID uint64) (products []models.
 
 	if err = rows.Err(); err != nil {
 		l.Error("iteration error", zap.Error(err))
+		return
 	}
 
 	return

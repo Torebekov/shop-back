@@ -35,16 +35,16 @@ func (s *Server) Run(port string) error {
 
 		favoriteRouter := productRouter.Group("favorite")
 		favoriteRouter.GET("")
-		favoriteRouter.POST("")
-		favoriteRouter.DELETE("")
+		favoriteRouter.POST("/:id", s.AddFavorite)
+		favoriteRouter.DELETE("/:id", s.RemoveFavorite)
 
 		cartRouter := productRouter.Group("cart")
 		cartRouter.GET("")
-		cartRouter.POST("")
-		cartRouter.DELETE("")
+		favoriteRouter.POST("/:id", s.AddFavorite)
+		favoriteRouter.DELETE("/:id", s.RemoveFavorite)
 	}
 
-	v1.GET("category")
+	v1.GET("category", s.GetCategories)
 
 	userRouter := v1.Group("user")
 	{
